@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة توليد البرومبتس الذكية</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: auto; line-height: 1.6; background-color: #f9fafb; color: #1f2937; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        input, button { padding: 12px; margin-top: 15px; font-size: 16px; border-radius: 8px; width: 100%; box-sizing: border-box; }
+        input { border: 1px solid #d1d5db; }
+        input:focus { outline: none; border-color: #2563eb; }
+        button { background-color: #2563eb; color: white; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #1d4ed8; }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        #result { margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 8px; white-space: pre-wrap; word-break: break-word; border-right: 4px solid #2563eb; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🤖 مولد البرومبتس الذكي</h2>
+        <p>اكتب فكرتك البسيطة، وسيقوم الذكاء الاصطناعي بتحويلها إلى برومبت احترافي ومفصل:</p>
+        
+        <input type="text" id="idea" placeholder="مثال: سيارة رياضية تسير في شارع طوكيو الممطر ليلاً">
+        <button id="btn" onclick="sendRequest()">أنشئ البرومبت</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function sendRequest() {
+            const ideaInput = document.getElementById('idea');
+            const btn = document.getElementById('btn');
+            const resultDiv = document.getElementById('result');
+            const ideaText = ideaInput.value.trim();
+
+            if (!ideaText) {
+                alert('الرجاء كتابة الفكرة أولاً!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = '⏳ جاري توليد البرومبت...';
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = 'جاري الاتصال بالخادم والذكاء الاصطناعي...';
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idea: ideaText })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerText = '✅ النتيجة:\n\n' + data.prompt;
+                } else {
+                    resultDiv.innerText = '❌ خطأ: ' + (data.prompt || 'حدث خطأ غير متوقع');
+                }
+            } catch (err) {
+                resultDiv.innerText = '❌ حدث خطأ في الاتصال بالشبكة.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'أنشئ البرومبت';
+            }
+        }
+    </script>
+</body>
+</html>
