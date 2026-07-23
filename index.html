@@ -1,68 +1,53 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أداة توليد البرومبتس الذكية</title>
+    <title>أداة البرومبتس</title>
     <style>
-        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: auto; line-height: 1.6; background-color: #f9fafb; color: #1f2937; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        input, button { padding: 12px; margin-top: 15px; font-size: 16px; border-radius: 8px; width: 100%; box-sizing: border-box; }
-        input { border: 1px solid #d1d5db; }
-        input:focus { outline: none; border-color: #2563eb; }
-        button { background-color: #2563eb; color: white; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s; }
-        button:hover { background-color: #1d4ed8; }
-        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
-        #result { margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 8px; white-space: pre-wrap; word-break: break-word; border-right: 4px solid #2563eb; display: none; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        input { width: 100%; padding: 10px; font-size: 16px; }
+        button { background: #007bff; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        #result { background: #f5f5f5; padding: 15px; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>🤖 مولد البرومبتس الذكي</h2>
-        <p>اكتب فكرتك البسيطة، وسيقوم الذكاء الاصطناعي بتحويلها إلى برومبت احترافي ومفصل:</p>
-        
-        <input type="text" id="idea" placeholder="مثال: سيارة رياضية تسير في شارع طوكيو الممطر ليلاً">
-        <button id="btn" onclick="sendRequest()">أنشئ البرومبت</button>
-
-        <div id="result"></div>
-    </div>
+    <h1>🤖 أداة إنشاء البرومبتس</h1>
+    <p>اكتب فكرتك البسيطة:</p>
+    <input type="text" id="idea" placeholder="مثال: صورة قطة في الصحراء">
+    <br>
+    <button onclick="sendRequest()">🚀 أنشئ البرومبت</button>
+    <div id="result"></div>
 
     <script>
         async function sendRequest() {
-            const ideaInput = document.getElementById('idea');
-            const btn = document.getElementById('btn');
+            const idea = document.getElementById('idea').value;
             const resultDiv = document.getElementById('result');
-            const ideaText = ideaInput.value.trim();
 
-            if (!ideaText) {
-                alert('الرجاء كتابة الفكرة أولاً!');
+            if (!idea.trim()) {
+                resultDiv.innerHTML = '⚠️ الرجاء إدخال فكرة.';
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerText = '⏳ جاري توليد البرومبت...';
-            resultDiv.style.display = 'block';
-            resultDiv.innerText = 'جاري الاتصال بالخادم والذكاء الاصطناعي...';
+            resultDiv.innerHTML = '⏳ جاري العمل...';
 
             try {
+                // ✅ المسار الصحيح: '/api/generate'
                 const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idea: ideaText })
+                    body: JSON.stringify({ idea: idea })
                 });
 
                 const data = await response.json();
-                
-                if (response.ok) {
-                    resultDiv.innerText = '✅ النتيجة:\n\n' + data.prompt;
-                } else {
-                    resultDiv.innerText = '❌ خطأ: ' + (data.prompt || 'حدث خطأ غير متوقع');
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'حدث خطأ غير معروف');
                 }
-            } catch (err) {
-                resultDiv.innerText = '❌ حدث خطأ في الاتصال بالشبكة.';
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'أنشئ البرومبت';
+
+                resultDiv.innerHTML = '✅ البرومبت المُولّد:\n\n' + data.prompt;
+            } catch (error) {
+                resultDiv.innerHTML = '❌ فشل في إنشاء البرومبت: ' + error.message;
             }
         }
     </script>
