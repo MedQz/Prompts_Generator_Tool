@@ -10,15 +10,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        // يجلب مفتاح Gemini بأمان تام من إعدادات Vercel (Environment Variables)
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
             return res.status(500).json({ prompt: 'مفتاح GEMINI_API_KEY غير موجود في إعدادات المنصة!' });
         }
 
-        // إرسال الطلب إلى نموذج Gemini 2.5 Flash المجاني
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        // استخدام نموذج gemini-1.5-flash المباشر والمستقر
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -31,6 +30,11 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
+
+        // إذا أرجع Google خطأ في مفتاح الـ API أو الطلب
+        if (data.error) {
+            return res.status(500).json({ prompt: `خطأ من جوجل: ${data.error.message}` });
+        }
 
         if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
             const resultText = data.candidates[0].content.parts[0].text;
